@@ -18,6 +18,7 @@ import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.food.FoodProperties
 import net.minecraft.world.item.Item
 import xyz.bluspring.beetleorigin.carry.CarryManager
+import xyz.bluspring.beetleorigin.network.BeetleNetwork
 
 class BeetleOrigin : ModInitializer {
     override fun onInitialize() {
@@ -54,6 +55,8 @@ class BeetleOrigin : ModInitializer {
 
             InteractionResult.PASS
         }
+
+        BeetleNetwork.initServer()
     }
 
     companion object {

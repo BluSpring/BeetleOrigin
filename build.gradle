@@ -22,6 +22,7 @@ repositories {
         url = 'https://maven.ladysnake.org/releases'
     }
     maven { url "https://maven.terraformersmc.com/releases/" }
+    maven { url "https://maven.architectury.dev/" }
     maven {
         url "https://maven.jamieswhiteshirt.com/libs-release"
         content {
@@ -45,6 +46,8 @@ dependencies {
 
     modImplementation "com.github.apace100:origins-fabric:v1.10.0"
     modImplementation "com.github.apace100:apoli:v2.9.0"
+
+    modApi "dev.architectury:architectury-fabric:9.1.12"
 }
 
 processResources {
