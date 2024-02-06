@@ -1,0 +1,12 @@
+{
+  "type": "origins:stacking_status_effect",
+  "min_stacks": 1,
+  "max_stacks": 50,
+  "duration_per_stack": 100000,
+  "effect": {
+    "effect": "minecraft:slow_falling",
+    "is_ambient": true,
+    "show_particles": false,
+    "show_icon": false
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "powers": [
+    "beetleorigin:carry",
+    "beetleorigin:exoskeleton",
+    "beetleorigin:slow_falling",
+
+    "beetleorigin:disable_shields",
+    "beetleorigin:hungry",
+    "origins:fragile"
+  ],
+  "icon": {
+    "item": "beetleorigin:beetle"
+  },
+  "order": 7,
+  "impact": 2,
+  "name": "Beetle",
+  "description": "Single funniest origin to ever exist"
+}

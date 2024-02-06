@@ -1,0 +1,17 @@
+{
+  "type": "origins:stacking_status_effect",
+  "min_stacks": -20,
+  "max_stacks": 25,
+  "duration_per_stack": 5,
+  "effect": {
+    "effect": "minecraft:levitation",
+    "is_ambient": true,
+    "show_particles": true,
+    "show_icon": true
+  },
+  "condition": {
+    "type": "origins:power_active",
+    "power": "beetleorigin:short_flight_trigger"
+  },
+  "hidden": true
+}

@@ -1,0 +1,7 @@
+{
+  "type": "origins:exhaust",
+  "interval": 20,
+  "exhaustion": 0.812,
+  "name": "Very Hungry",
+  "description": "You have an insatiable yearning for food."
+}

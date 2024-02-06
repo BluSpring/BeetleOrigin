@@ -1,0 +1,11 @@
+{
+  "type": "origins:attribute",
+  "modifier": {
+    "name": "Beetle extra armor",
+    "attribute": "minecraft:generic.armor_toughness",
+    "value": 6,
+    "operation": "addition"
+  },
+  "name": "Exoskeleton",
+  "description": "Your tough exoskeleton grants you additional defense from attacks."
+}

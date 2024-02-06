@@ -1,0 +1,9 @@
+{
+  "type": "origins:prevent_item_use",
+  "item_condition": {
+    "type": "beetleorigin:is_of",
+    "tag": "beetleorigin:shield"
+  },
+  "name": "No Shields",
+  "description": "You are very proud of your exoskeleton, so why would you use a shield?"
+}
