@@ -4,7 +4,6 @@ import dev.architectury.event.EventResult
 import dev.architectury.event.events.common.EntityEvent
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
-import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.util.Mth
@@ -127,7 +126,6 @@ class CarryManager {
         ).mul(vec3)
 
         carried.setDeltaMovement(vec3d.x, vec3d.y, vec3d.z)
-        carrier.displayClientMessage(Component.literal("${vec3d.x} ${vec3d.y} ${vec3d.z}"), false)
     }
 
     companion object {
