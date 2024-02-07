@@ -8,5 +8,7 @@
     "is_ambient": true,
     "show_particles": false,
     "show_icon": false
-  }
+  },
+  "name": "Slow Descent",
+  "description": "Because of your wings, you slowly descend to the ground"
 }

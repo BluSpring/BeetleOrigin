@@ -4,11 +4,15 @@ import dev.architectury.event.EventResult
 import dev.architectury.event.events.common.EntityEvent
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.minecraft.network.chat.Component
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerGamePacketListenerImpl
+import net.minecraft.util.Mth
 import net.minecraft.world.damagesource.DamageSource
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
+import org.joml.Vector3d
+import org.joml.Vector3f
 import xyz.bluspring.beetleorigin.network.BeetleNetwork
 
 class CarryManager {
@@ -35,7 +39,12 @@ class CarryManager {
         if (!isActive)
             return
 
-        stopCarrying(handler.player)
+        if (isCarrying(handler.player))
+            stopCarrying(handler.player)
+        else if (isBeingCarried(handler.player)) {
+            val carrier = getCarrier(handler.player) ?: return
+            stopCarrying(carrier)
+        }
     }
 
     fun reset() {
@@ -70,8 +79,55 @@ class CarryManager {
             BeetleNetwork.broadcast(BeetleNetwork.STOP_CARRYING, buf)
         }
 
+        val carried = carriers[carrier] ?: return
         carriers.remove(carrier)
-        carrier.ejectPassengers()
+
+        carried.removeVehicle()
+        carried.dismountTo(carrier.x, carrier.y + carrier.passengersRidingOffset + carried.myRidingOffset, carrier.z)
+    }
+
+    fun isCarrying(carrier: Player): Boolean {
+        return carriers.containsKey(carrier)
+    }
+
+    fun isBeingCarried(carried: Entity): Boolean {
+        return carriers.containsValue(carried)
+    }
+
+    fun getCarrier(carried: Entity): Player? {
+        return carriers.filter { it.value == carried }.keys.firstOrNull()
+    }
+
+    fun getCarried(carrier: Player): Entity? {
+        return carriers[carrier]
+    }
+
+    fun throwEntity(carrier: Player) {
+        val carried = getCarried(carrier) ?: return
+
+        stopCarrying(carrier)
+        (carried as EntityTossExtension).beetleWasThrown = true
+
+        val forwardVelocity = 5.4
+
+        val radX = (carrier.xRot * Mth.DEG_TO_RAD) + Mth.HALF_PI
+        val pitch = Mth.sin(radX)
+        val radY = carrier.yRot * Mth.DEG_TO_RAD
+
+        val vec3 = Vector3f(
+            -(Mth.sin(radY)),
+            1f,
+            (Mth.cos(radY))
+        ).normalize()
+
+        val vec3d = Vector3d(
+            forwardVelocity * pitch,
+            3.4 * (Mth.cos(radX)),
+            forwardVelocity * pitch
+        ).mul(vec3)
+
+        carried.setDeltaMovement(vec3d.x, vec3d.y, vec3d.z)
+        carrier.displayClientMessage(Component.literal("${vec3d.x} ${vec3d.y} ${vec3d.z}"), false)
     }
 
     companion object {

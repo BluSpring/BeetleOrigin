@@ -4,9 +4,11 @@
   "package": "xyz.bluspring.beetleorigin.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "EntityMixin"
+    "EntityMixin",
+    "PlayerMixin"
   ],
   "client": [
+    "PlayerRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

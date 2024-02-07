@@ -13,6 +13,7 @@ import xyz.bluspring.beetleorigin.carry.CarryManager
 object BeetleNetwork {
     val START_CARRYING = ResourceLocation(BeetleOrigin.MOD_ID, "start_carry")
     val STOP_CARRYING = ResourceLocation(BeetleOrigin.MOD_ID, "stop_carry")
+    val THROW_CARRIED = ResourceLocation(BeetleOrigin.MOD_ID, "throw_carried")
 
     lateinit var server: MinecraftServer
 
@@ -21,20 +22,20 @@ object BeetleNetwork {
             val carrierUuid = buf.readUUID()
             val carriedId = buf.readVarInt()
 
-            val carrier = client.level!!.getPlayerByUUID(carrierUuid)
-            val carried = client.level!!.getEntity(carriedId)
+            val carrier = client.level!!.getPlayerByUUID(carrierUuid) ?: return@registerGlobalReceiver
+            val carried = client.level!!.getEntity(carriedId) ?: return@registerGlobalReceiver
 
             val carryManager = CarryManager.get(true)
-            carryManager.carryEntity(carrier!!, carried!!)
+            carryManager.carryEntity(carrier, carried)
         }
 
         ClientPlayNetworking.registerGlobalReceiver(STOP_CARRYING) { client, handler, buf, sender ->
             val carrierUuid = buf.readUUID()
 
-            val carrier = client.level!!.getPlayerByUUID(carrierUuid)
+            val carrier = client.level!!.getPlayerByUUID(carrierUuid) ?: return@registerGlobalReceiver
 
             val carryManager = CarryManager.get(true)
-            carryManager.stopCarrying(carrier!!)
+            carryManager.stopCarrying(carrier)
         }
 
         ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
@@ -49,6 +50,12 @@ object BeetleNetwork {
     fun initServer() {
         ServerLifecycleEvents.SERVER_STARTING.register {
             server = it
+        }
+
+        ServerPlayNetworking.registerGlobalReceiver(THROW_CARRIED) { server, player, handler, buf, sender ->
+            val carryManager = CarryManager.get(false)
+
+            carryManager.throwEntity(player)
         }
     }
 

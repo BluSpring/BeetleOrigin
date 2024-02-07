@@ -1,0 +1,8 @@
+{
+    "type": "origins:active_self",
+    "name": "Fling Entities",
+    "description": "When you have an entity picked up, you are able to fling them.",
+    "entity_action": {
+        "type": "beetleorigin:fling_entity"
+    }
+}

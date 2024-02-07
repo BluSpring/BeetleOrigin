@@ -7,4 +7,5 @@ import net.minecraft.resources.ResourceLocation
 
 object BeetlePowers {
     val CARRY_POWER: PowerType<*> = PowerTypeReference<Power>(ResourceLocation(BeetleOrigin.MOD_ID, "carry"))
+    val THROW_POWER: PowerType<*> = PowerTypeReference<Power>(ResourceLocation(BeetleOrigin.MOD_ID, "throw"))
 }

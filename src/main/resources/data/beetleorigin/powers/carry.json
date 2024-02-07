@@ -1,5 +1,5 @@
 {
   "type": "origins:simple",
-  "name": "Carry Players",
-  "description": "You have the ability to pick players up, and throw them like cannonballs."
+  "name": "Carry Entities",
+  "description": "You have the ability to pick entities up, and throw them like cannonballs."
 }

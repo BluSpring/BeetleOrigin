@@ -1,5 +1,7 @@
 package xyz.bluspring.beetleorigin
 
+import dev.architectury.event.events.common.TickEvent
+import io.github.apace100.apoli.power.factory.action.ActionFactory
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory
 import io.github.apace100.apoli.registry.ApoliRegistries
 import io.github.apace100.calio.data.SerializableData
@@ -17,9 +19,11 @@ import net.minecraft.tags.TagKey
 import net.minecraft.world.InteractionResult
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
+import net.minecraft.world.entity.player.Player
 import net.minecraft.world.food.FoodProperties
 import net.minecraft.world.item.Item
 import xyz.bluspring.beetleorigin.carry.CarryManager
+import xyz.bluspring.beetleorigin.carry.PlayerCarryExtension
 import xyz.bluspring.beetleorigin.network.BeetleNetwork
 
 class BeetleOrigin : ModInitializer {
@@ -31,7 +35,7 @@ class BeetleOrigin : ModInitializer {
                         .alwaysEat()
                         .fast()
                         .nutrition(1)
-                        .effect(MobEffectInstance(MobEffects.CONFUSION, 15, 2), 0.75f)
+                        .effect(MobEffectInstance(MobEffects.CONFUSION, 15 * 20, 2), 0.75f)
                         .build()
                 )
         ))
@@ -42,6 +46,15 @@ class BeetleOrigin : ModInitializer {
             val tag = data.get<TagKey<Item>>("tag")
 
             stack.`is`(tag)
+        })
+
+        val flingEntity = ResourceLocation(MOD_ID, "fling_entity")
+        Registry.register(ApoliRegistries.ENTITY_ACTION, flingEntity, ActionFactory(flingEntity, SerializableData()) { instance, entity ->
+            if (entity is Player) {
+                val carryManager = CarryManager.get(entity.level().isClientSide())
+
+                carryManager.throwEntity(entity)
+            }
         })
 
         UseEntityCallback.EVENT.register { player, level, hand, entity, hit ->
@@ -70,6 +83,22 @@ class BeetleOrigin : ModInitializer {
             }
 
             InteractionResult.PASS
+        }
+
+        TickEvent.PLAYER_POST.register { player ->
+            val carryManager = CarryManager.get(player.level().isClientSide)
+
+            if (BeetlePowers.CARRY_POWER.get(player) != null) {
+                if (carryManager.isCarrying(player)) {
+                    if (player.isShiftKeyDown && (player as PlayerCarryExtension).beetleSneakTime++ >= 50) {
+                        player.beetleSneakTime = 0
+
+                        carryManager.stopCarrying(player)
+                    } else if (!player.isShiftKeyDown && (player as PlayerCarryExtension).beetleSneakTime > 0) {
+                        player.beetleSneakTime = 0
+                    }
+                }
+            }
         }
 
         ServerLifecycleEvents.SERVER_STARTING.register {

@@ -1,6 +1,7 @@
 {
   "powers": [
     "beetleorigin:carry",
+    "beetleorigin:throw",
     "beetleorigin:exoskeleton",
     "beetleorigin:slow_falling",
 
