@@ -4,6 +4,7 @@
   "package": "xyz.bluspring.beetleorigin.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "EntityMixin"
   ],
   "client": [
   ],

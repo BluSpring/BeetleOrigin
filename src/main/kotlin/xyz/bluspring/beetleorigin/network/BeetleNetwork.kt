@@ -1,5 +1,6 @@
 package xyz.bluspring.beetleorigin.network
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -7,6 +8,7 @@ import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
 import xyz.bluspring.beetleorigin.BeetleOrigin
+import xyz.bluspring.beetleorigin.carry.CarryManager
 
 object BeetleNetwork {
     val START_CARRYING = ResourceLocation(BeetleOrigin.MOD_ID, "start_carry")
@@ -16,11 +18,31 @@ object BeetleNetwork {
 
     fun initClient() {
         ClientPlayNetworking.registerGlobalReceiver(START_CARRYING) { client, handler, buf, sender ->
+            val carrierUuid = buf.readUUID()
+            val carriedId = buf.readVarInt()
 
+            val carrier = client.level!!.getPlayerByUUID(carrierUuid)
+            val carried = client.level!!.getEntity(carriedId)
+
+            val carryManager = CarryManager.get(true)
+            carryManager.carryEntity(carrier!!, carried!!)
         }
 
         ClientPlayNetworking.registerGlobalReceiver(STOP_CARRYING) { client, handler, buf, sender ->
+            val carrierUuid = buf.readUUID()
 
+            val carrier = client.level!!.getPlayerByUUID(carrierUuid)
+
+            val carryManager = CarryManager.get(true)
+            carryManager.stopCarrying(carrier!!)
+        }
+
+        ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
+            CarryManager.create(true)
+        }
+
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
+            CarryManager.reset(true)
         }
     }
 

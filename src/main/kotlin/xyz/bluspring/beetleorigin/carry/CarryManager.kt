@@ -51,6 +51,15 @@ class CarryManager {
             throw IllegalStateException("$carried is already being carried!")
 
         carriers[carrier] = carried
+        if (!carrier.level().isClientSide) {
+            val buf = PacketByteBufs.create()
+            buf.writeUUID(carrier.uuid)
+            buf.writeVarInt(carried.id)
+
+            BeetleNetwork.broadcast(BeetleNetwork.START_CARRYING, buf)
+        }
+
+        carried.startRiding(carrier, true)
     }
 
     fun stopCarrying(carrier: Player) {
@@ -62,6 +71,7 @@ class CarryManager {
         }
 
         carriers.remove(carrier)
+        carrier.ejectPassengers()
     }
 
     companion object {
@@ -87,10 +97,13 @@ class CarryManager {
         }
 
         fun reset(isClient: Boolean) {
-            if (isClient)
+            if (isClient) {
+                client?.reset()
                 client = null
-            else
+            } else {
+                server?.reset()
                 server = null
+            }
         }
     }
 }

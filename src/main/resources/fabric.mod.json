@@ -30,6 +30,6 @@
     "minecraft": "${minecraft_version}",
     "fabric-language-kotlin": ">=1.10.17+kotlin.1.9.22",
     "origins": ">=1.10",
-    "architectury-api": ">=9"
+    "architectury": ">=9"
   }
 }

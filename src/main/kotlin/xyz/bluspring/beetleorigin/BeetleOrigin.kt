@@ -5,7 +5,9 @@ import io.github.apace100.apoli.registry.ApoliRegistries
 import io.github.apace100.calio.data.SerializableData
 import io.github.apace100.calio.data.SerializableDataType
 import net.fabricmc.api.ModInitializer
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.player.UseEntityCallback
+import net.minecraft.ChatFormatting
 import net.minecraft.core.Registry
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.core.registries.Registries
@@ -37,23 +39,45 @@ class BeetleOrigin : ModInitializer {
         val hasTag = ResourceLocation(MOD_ID, "is_of")
         Registry.register(ApoliRegistries.ITEM_CONDITION, hasTag, ConditionFactory(hasTag, SerializableData()
             .add("tag", SerializableDataType.tag(Registries.ITEM))) { data, stack ->
-            val id = data.getId("tag")
-            val tag = TagKey.create(Registries.ITEM, id)
+            val tag = data.get<TagKey<Item>>("tag")
 
             stack.`is`(tag)
         })
 
         UseEntityCallback.EVENT.register { player, level, hand, entity, hit ->
             if (BeetlePowers.CARRY_POWER.get(player) != null && player.isShiftKeyDown) {
+                if (!player.getItemInHand(hand).isEmpty)
+                    return@register InteractionResult.PASS
+
                 val carryManager = CarryManager.get(level.isClientSide())
 
                 if (carryManager.carriers.containsKey(player)) {
-                    player.displayClientMessage(Component.literal("You're already carrying an entity!"), true)
+                    player.displayClientMessage(Component.literal("You're already carrying an entity!")
+                        .withStyle(ChatFormatting.RED), true)
                     return@register InteractionResult.SUCCESS
                 }
+
+                if (carryManager.carriers.containsValue(entity)) {
+                    player.displayClientMessage(Component.literal("Entity is already being carried!")
+                        .withStyle(ChatFormatting.RED), true)
+                    return@register InteractionResult.SUCCESS
+                }
+
+                if (!level.isClientSide) // Server must validate first
+                    carryManager.carryEntity(player, entity)
+
+                return@register InteractionResult.SUCCESS
             }
 
             InteractionResult.PASS
+        }
+
+        ServerLifecycleEvents.SERVER_STARTING.register {
+            CarryManager.create(false)
+        }
+
+        ServerLifecycleEvents.SERVER_STOPPING.register {
+            CarryManager.reset(false)
         }
 
         BeetleNetwork.initServer()
