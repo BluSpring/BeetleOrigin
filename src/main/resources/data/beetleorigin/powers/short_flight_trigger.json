@@ -1,0 +1,22 @@
+{
+    "type": "origins:active_self",
+    "name": "Short Flight",
+    "description": "You get to fly for a short period of time.",
+    "key": {
+        "key": "key.origins.secondary_active",
+        "continuous": true
+    },
+    "entity_action": {
+        "type": "origins:apply_effect",
+        "effect": {
+            "effect": "minecraft:levitation",
+            "duration": 60,
+            "amplifier": 2
+        }
+    },
+    "cooldown": 600,
+    "hud_render": {
+        "bar_index": 4,
+        "icon_index": 4
+    }
+}
