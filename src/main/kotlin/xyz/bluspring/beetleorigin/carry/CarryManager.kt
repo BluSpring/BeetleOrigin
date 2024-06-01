@@ -5,7 +5,9 @@ import dev.architectury.event.events.common.EntityEvent
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.ServerGamePacketListenerImpl
 import net.minecraft.util.Mth
 import net.minecraft.world.damagesource.DamageSource
@@ -144,6 +146,15 @@ class CarryManager(isClient: Boolean) {
         ).mul(vec3)
 
         carried.setDeltaMovement(vec3d.x, vec3d.y, vec3d.z)
+
+        if (carried is ServerPlayer) {
+            val buf = PacketByteBufs.create()
+            buf.writeDouble(vec3d.x)
+            buf.writeDouble(vec3d.y)
+            buf.writeDouble(vec3d.z)
+
+            ServerPlayNetworking.send(carried, BeetleNetwork.THROW_CARRIED, buf)
+        }
     }
 
     companion object {
