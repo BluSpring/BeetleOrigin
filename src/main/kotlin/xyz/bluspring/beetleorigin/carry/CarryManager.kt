@@ -2,6 +2,7 @@ package xyz.bluspring.beetleorigin.carry
 
 import dev.architectury.event.EventResult
 import dev.architectury.event.events.common.EntityEvent
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.MinecraftServer
@@ -14,13 +15,30 @@ import org.joml.Vector3d
 import org.joml.Vector3f
 import xyz.bluspring.beetleorigin.network.BeetleNetwork
 
-class CarryManager {
+class CarryManager(isClient: Boolean) {
     val carriers = mutableMapOf<Player, Entity>()
     var isActive = true
 
     init {
         EntityEvent.LIVING_DEATH.register(this::onLivingDeath)
         ServerPlayConnectionEvents.DISCONNECT.register(this::onDisconnect)
+
+        if (isClient) {
+            initClient()
+        }
+    }
+
+    private fun initClient() {
+        ClientEntityEvents.ENTITY_UNLOAD.register { entity, level ->
+            if (entity is Player) {
+                if (carriers.containsKey(entity))
+                    carriers.remove(entity)
+                else if (carriers.containsValue(entity)) {
+                    val carrier = getCarrier(entity)
+                    carriers.remove(carrier)
+                }
+            }
+        }
     }
 
     private fun onLivingDeath(entity: Entity, source: DamageSource): EventResult {
@@ -140,7 +158,7 @@ class CarryManager {
         }
 
         fun create(isClient: Boolean): CarryManager {
-            val manager = CarryManager()
+            val manager = CarryManager(isClient)
 
             if (isClient)
                 client = manager
