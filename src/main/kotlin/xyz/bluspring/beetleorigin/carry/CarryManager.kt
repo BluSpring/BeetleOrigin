@@ -5,7 +5,7 @@ import dev.architectury.event.events.common.EntityEvent
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
-import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.ServerGamePacketListenerImpl
@@ -148,7 +148,12 @@ class CarryManager(isClient: Boolean) {
         carried.setDeltaMovement(vec3d.x, vec3d.y, vec3d.z)
 
         if (carried is ServerPlayer) {
-            carried.connection.send(ClientboundSetEntityMotionPacket(carried))
+            val buf = PacketByteBufs.create()
+            buf.writeDouble(vec3d.x)
+            buf.writeDouble(vec3d.y)
+            buf.writeDouble(vec3d.z)
+
+            ServerPlayNetworking.send(carried, BeetleNetwork.THROW_CARRIED, buf)
         }
     }
 

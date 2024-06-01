@@ -38,6 +38,16 @@ object BeetleNetwork {
             carryManager.stopCarrying(carrier)
         }
 
+        ClientPlayNetworking.registerGlobalReceiver(THROW_CARRIED) { client, handler, buf, sender ->
+            val x = buf.readDouble()
+            val y = buf.readDouble()
+            val z = buf.readDouble()
+
+            client.execute {
+                client.player?.setDeltaMovement(x, y, z)
+            }
+        }
+
         ClientPlayConnectionEvents.JOIN.register { _, _, _ ->
             CarryManager.create(true)
         }
