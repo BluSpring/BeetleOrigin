@@ -45,6 +45,7 @@ object BeetleNetwork {
 
             client.execute {
                 client.player?.setDeltaMovement(x, y, z)
+                client.player?.hurtMarked = true
             }
         }
 
@@ -52,8 +53,10 @@ object BeetleNetwork {
             CarryManager.create(true)
         }
 
-        ClientPlayConnectionEvents.DISCONNECT.register { _, _ ->
-            CarryManager.reset(true)
+        ClientPlayConnectionEvents.DISCONNECT.register { listener, client ->
+            client.execute {
+                CarryManager.reset(true)
+            }
         }
     }
 
@@ -65,7 +68,9 @@ object BeetleNetwork {
         ServerPlayNetworking.registerGlobalReceiver(THROW_CARRIED) { server, player, handler, buf, sender ->
             val carryManager = CarryManager.get(false)
 
-            carryManager.throwEntity(player)
+            server.execute {
+                carryManager.throwEntity(player)
+            }
         }
     }
 

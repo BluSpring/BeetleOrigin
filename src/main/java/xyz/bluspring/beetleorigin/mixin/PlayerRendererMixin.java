@@ -14,13 +14,15 @@ import xyz.bluspring.beetleorigin.carry.CarryManager;
 public class PlayerRendererMixin {
     @Inject(method = "getArmPose", at = @At("RETURN"), cancellable = true)
     private static void beetleorigin$useCarryAnimation(AbstractClientPlayer player, InteractionHand hand, CallbackInfoReturnable<HumanoidModel.ArmPose> cir) {
-        if (!CarryManager.Companion.get(true).isCarrying(player))
-            return;
+        try {
+            if (!CarryManager.Companion.get(true).isCarrying(player))
+                return;
 
-        var originalPose = cir.getReturnValue();
+            var originalPose = cir.getReturnValue();
 
-        if (originalPose == HumanoidModel.ArmPose.EMPTY || originalPose == HumanoidModel.ArmPose.ITEM) {
-            cir.setReturnValue(HumanoidModel.ArmPose.THROW_SPEAR);
-        }
+            if (originalPose == HumanoidModel.ArmPose.EMPTY || originalPose == HumanoidModel.ArmPose.ITEM) {
+                cir.setReturnValue(HumanoidModel.ArmPose.THROW_SPEAR);
+            }
+        } catch (Exception ignored) {}
     }
 }

@@ -146,6 +146,7 @@ class CarryManager(isClient: Boolean) {
         ).mul(vec3)
 
         carried.setDeltaMovement(vec3d.x, vec3d.y, vec3d.z)
+        carried.hurtMarked = true
 
         if (carried is ServerPlayer) {
             val buf = PacketByteBufs.create()
