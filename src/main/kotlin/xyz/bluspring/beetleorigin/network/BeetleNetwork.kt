@@ -3,10 +3,12 @@ package xyz.bluspring.beetleorigin.network
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
+import net.minecraft.world.entity.player.Player
 import xyz.bluspring.beetleorigin.BeetleOrigin
 import xyz.bluspring.beetleorigin.carry.CarryManager
 
@@ -14,6 +16,7 @@ object BeetleNetwork {
     val START_CARRYING = ResourceLocation(BeetleOrigin.MOD_ID, "start_carry")
     val STOP_CARRYING = ResourceLocation(BeetleOrigin.MOD_ID, "stop_carry")
     val THROW_CARRIED = ResourceLocation(BeetleOrigin.MOD_ID, "throw_carried")
+    val SYNC_CARRY = ResourceLocation(BeetleOrigin.MOD_ID, "sync_carry")
 
     lateinit var server: MinecraftServer
 
@@ -70,6 +73,30 @@ object BeetleNetwork {
 
             server.execute {
                 carryManager.throwEntity(player)
+            }
+        }
+
+        ServerPlayNetworking.registerGlobalReceiver(SYNC_CARRY) { server, player, handler, buf, sender ->
+            val entityId = buf.readVarInt()
+            val entity = player.level().getEntity(entityId) ?: return@registerGlobalReceiver
+
+            val carryManager = CarryManager.get(false)
+
+            if (carryManager.isBeingCarried(entity)) {
+                val carriedBuf = PacketByteBufs.create()
+
+                carriedBuf.writeUUID(carryManager.getCarrier(entity)!!.uuid)
+                carriedBuf.writeVarInt(entity.id)
+
+                ServerPlayNetworking.send(player, START_CARRYING, carriedBuf)
+            } else if (entity is Player && carryManager.isCarrying(entity)) {
+                val carried = carryManager.getCarried(entity)!!
+
+                val carriedBuf = PacketByteBufs.create()
+                carriedBuf.writeUUID(entity.uuid)
+                carriedBuf.writeVarInt(carried.id)
+
+                ServerPlayNetworking.send(player, START_CARRYING, carriedBuf)
             }
         }
     }

@@ -3,6 +3,7 @@ package xyz.bluspring.beetleorigin.carry
 import dev.architectury.event.EventResult
 import dev.architectury.event.events.common.EntityEvent
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -39,7 +40,17 @@ class CarryManager(isClient: Boolean) {
                     val carrier = getCarrier(entity)
                     carriers.remove(carrier)
                 }
+            } else if (isBeingCarried(entity)) {
+                val carrier = getCarrier(entity)
+                carriers.remove(carrier)
             }
+        }
+
+        ClientEntityEvents.ENTITY_LOAD.register { entity, level ->
+            val buf = PacketByteBufs.create()
+            buf.writeVarInt(entity.id)
+
+            ClientPlayNetworking.send(BeetleNetwork.SYNC_CARRY, buf)
         }
     }
 
@@ -72,10 +83,10 @@ class CarryManager(isClient: Boolean) {
     }
 
     fun carryEntity(carrier: Player, carried: Entity) {
-        if (carriers.containsKey(carrier))
+        if (carriers.containsKey(carrier) && carriers[carrier] != carried)
             throw IllegalStateException("$carrier is already carrying an entity ($carried)!")
 
-        if (carriers.containsValue(carried))
+        if (carriers.containsValue(carried) && getCarrier(carried) != carrier)
             throw IllegalStateException("$carried is already being carried!")
 
         carriers[carrier] = carried
