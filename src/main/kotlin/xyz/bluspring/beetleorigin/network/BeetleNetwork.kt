@@ -4,10 +4,13 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.player.Player
 import xyz.bluspring.beetleorigin.BeetleOrigin
 import xyz.bluspring.beetleorigin.carry.CarryManager
@@ -101,9 +104,15 @@ object BeetleNetwork {
         }
     }
 
-    fun broadcast(id: ResourceLocation, data: FriendlyByteBuf) {
-        for (player in server.playerList.players) {
+    fun broadcast(id: ResourceLocation, data: FriendlyByteBuf, tracked: Entity) {
+        val tracking = PlayerLookup.tracking(tracked)
+
+        for (player in tracking) {
             ServerPlayNetworking.send(player, id, data)
+        }
+
+        if (tracked is ServerPlayer && !tracking.contains(tracked)) {
+            ServerPlayNetworking.send(tracked, id, data)
         }
     }
 }

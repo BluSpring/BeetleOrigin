@@ -95,7 +95,7 @@ class CarryManager(isClient: Boolean) {
             buf.writeUUID(carrier.uuid)
             buf.writeVarInt(carried.id)
 
-            BeetleNetwork.broadcast(BeetleNetwork.START_CARRYING, buf)
+            BeetleNetwork.broadcast(BeetleNetwork.START_CARRYING, buf, carrier)
         }
 
         carried.startRiding(carrier, true)
@@ -106,7 +106,7 @@ class CarryManager(isClient: Boolean) {
             val buf = PacketByteBufs.create()
             buf.writeUUID(carrier.uuid)
 
-            BeetleNetwork.broadcast(BeetleNetwork.STOP_CARRYING, buf)
+            BeetleNetwork.broadcast(BeetleNetwork.STOP_CARRYING, buf, carrier)
         }
 
         val carried = carriers[carrier] ?: return
