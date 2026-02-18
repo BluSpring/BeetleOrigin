@@ -6,6 +6,6 @@ import io.github.apace100.apoli.power.PowerTypeReference
 import net.minecraft.resources.ResourceLocation
 
 object BeetlePowers {
-    val CARRY_POWER: PowerType<*> = PowerTypeReference<Power>(ResourceLocation(BeetleOrigin.MOD_ID, "carry"))
-    val THROW_POWER: PowerType<*> = PowerTypeReference<Power>(ResourceLocation(BeetleOrigin.MOD_ID, "throw"))
+    val CARRY_POWER: PowerType<*> = PowerTypeReference<Power>(ResourceLocation.fromNamespaceAndPath(BeetleOrigin.MOD_ID, "carry"))
+    val THROW_POWER: PowerType<*> = PowerTypeReference<Power>(ResourceLocation.fromNamespaceAndPath(BeetleOrigin.MOD_ID, "throw"))
 }

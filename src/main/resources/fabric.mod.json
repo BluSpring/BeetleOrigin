@@ -3,7 +3,7 @@
   "id": "beetleorigin",
   "version": "${version}",
   "name": "BeetleOrigin",
-  "description": "Comedic Beetle origin for Crimecraft S4",
+  "description": "Comedic Beetle origin for Crimecraft S4, updated for Unprod's Origins SMP",
   "authors": [
     "BluSpring"
   ],
@@ -28,8 +28,8 @@
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
-    "fabric-language-kotlin": ">=1.10.17+kotlin.1.9.22",
-    "origins": ">=1.10",
+    "fabric-language-kotlin": ">=1.13.9+kotlin.2.3.10",
+    "origins-legacy": ">=1.10",
     "architectury": ">=9"
   }
 }

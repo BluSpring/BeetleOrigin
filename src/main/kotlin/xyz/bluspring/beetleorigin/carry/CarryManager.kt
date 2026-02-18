@@ -4,7 +4,6 @@ import dev.architectury.event.EventResult
 import dev.architectury.event.events.common.EntityEvent
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.server.MinecraftServer
@@ -17,6 +16,10 @@ import net.minecraft.world.entity.player.Player
 import org.joml.Vector3d
 import org.joml.Vector3f
 import xyz.bluspring.beetleorigin.network.BeetleNetwork
+import xyz.bluspring.beetleorigin.network.packet.StartCarryingPacket
+import xyz.bluspring.beetleorigin.network.packet.StopCarryingPacket
+import xyz.bluspring.beetleorigin.network.packet.SyncCarryPacket
+import xyz.bluspring.beetleorigin.network.packet.ThrowCarriedClientboundPacket
 
 class CarryManager(isClient: Boolean) {
     val carriers = mutableMapOf<Player, Entity>()
@@ -47,10 +50,7 @@ class CarryManager(isClient: Boolean) {
         }
 
         ClientEntityEvents.ENTITY_LOAD.register { entity, level ->
-            val buf = PacketByteBufs.create()
-            buf.writeVarInt(entity.id)
-
-            ClientPlayNetworking.send(BeetleNetwork.SYNC_CARRY, buf)
+            ClientPlayNetworking.send(SyncCarryPacket(entity.id))
         }
     }
 
@@ -91,11 +91,7 @@ class CarryManager(isClient: Boolean) {
 
         carriers[carrier] = carried
         if (!carrier.level().isClientSide) {
-            val buf = PacketByteBufs.create()
-            buf.writeUUID(carrier.uuid)
-            buf.writeVarInt(carried.id)
-
-            BeetleNetwork.broadcast(BeetleNetwork.START_CARRYING, buf, carrier)
+            BeetleNetwork.broadcast(StartCarryingPacket(carrier.uuid, carried.id), carrier)
         }
 
         carried.startRiding(carrier, true)
@@ -103,17 +99,16 @@ class CarryManager(isClient: Boolean) {
 
     fun stopCarrying(carrier: Player) {
         if (!carrier.level().isClientSide) {
-            val buf = PacketByteBufs.create()
-            buf.writeUUID(carrier.uuid)
-
-            BeetleNetwork.broadcast(BeetleNetwork.STOP_CARRYING, buf, carrier)
+            BeetleNetwork.broadcast(StopCarryingPacket(carrier.uuid), carrier)
         }
 
         val carried = carriers[carrier] ?: return
         carriers.remove(carrier)
 
         carried.removeVehicle()
-        carried.dismountTo(carrier.x, carrier.y + carrier.passengersRidingOffset + carried.myRidingOffset, carrier.z)
+        val riderAttachment = carrier.getVehicleAttachmentPoint(carried)
+        val ridingAttachment = carried.getPassengerRidingPosition(carrier)
+        carried.dismountTo(carrier.x, ridingAttachment.y + riderAttachment.y, carrier.z)
     }
 
     fun isCarrying(carrier: Player): Boolean {
@@ -160,12 +155,7 @@ class CarryManager(isClient: Boolean) {
         carried.hurtMarked = true
 
         if (carried is ServerPlayer) {
-            val buf = PacketByteBufs.create()
-            buf.writeDouble(vec3d.x)
-            buf.writeDouble(vec3d.y)
-            buf.writeDouble(vec3d.z)
-
-            ServerPlayNetworking.send(carried, BeetleNetwork.THROW_CARRIED, buf)
+            ServerPlayNetworking.send(carried, ThrowCarriedClientboundPacket(vec3d))
         }
     }
 

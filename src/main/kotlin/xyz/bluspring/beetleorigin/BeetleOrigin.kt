@@ -28,11 +28,11 @@ import xyz.bluspring.beetleorigin.network.BeetleNetwork
 
 class BeetleOrigin : ModInitializer {
     override fun onInitialize() {
-        Registry.register(BuiltInRegistries.ITEM, ResourceLocation(MOD_ID, "beetle"), Item(
+        Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath(MOD_ID, "beetle"), Item(
             Item.Properties()
                 .food(
                     FoodProperties.Builder()
-                        .alwaysEat()
+                        .alwaysEdible()
                         .fast()
                         .nutrition(1)
                         .effect(MobEffectInstance(MobEffects.CONFUSION, 15 * 20, 2), 0.75f)
@@ -40,7 +40,7 @@ class BeetleOrigin : ModInitializer {
                 )
         ))
 
-        val hasTag = ResourceLocation(MOD_ID, "is_of")
+        val hasTag = ResourceLocation.fromNamespaceAndPath(MOD_ID, "is_of")
         Registry.register(ApoliRegistries.ITEM_CONDITION, hasTag, ConditionFactory(hasTag, SerializableData()
             .add("tag", SerializableDataType.tag(Registries.ITEM))) { data, stack ->
             val tag = data.get<TagKey<Item>>("tag")
@@ -48,7 +48,7 @@ class BeetleOrigin : ModInitializer {
             stack.`is`(tag)
         })
 
-        val flingEntity = ResourceLocation(MOD_ID, "fling_entity")
+        val flingEntity = ResourceLocation.fromNamespaceAndPath(MOD_ID, "fling_entity")
         Registry.register(ApoliRegistries.ENTITY_ACTION, flingEntity, ActionFactory(flingEntity, SerializableData()) { instance, entity ->
             if (entity is Player) {
                 val carryManager = CarryManager.get(entity.level().isClientSide())
