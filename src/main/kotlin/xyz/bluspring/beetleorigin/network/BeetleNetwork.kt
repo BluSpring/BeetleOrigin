@@ -28,7 +28,7 @@ object BeetleNetwork {
     init {
         PayloadTypeRegistry.playS2C().register(START_CARRYING, StartCarryingPacket.CODEC)
         PayloadTypeRegistry.playS2C().register(STOP_CARRYING, StopCarryingPacket.CODEC)
-        PayloadTypeRegistry.playS2C().register(THROW_CARRIED_SERVERBOUND, ThrowCarriedServerboundPacket.CODEC)
+        PayloadTypeRegistry.playC2S().register(THROW_CARRIED_SERVERBOUND, ThrowCarriedServerboundPacket.CODEC)
         PayloadTypeRegistry.playS2C().register(THROW_CARRIED_CLIENTBOUND, ThrowCarriedClientboundPacket.CODEC)
         PayloadTypeRegistry.playC2S().register(SYNC_CARRY, SyncCarryPacket.CODEC)
     }
